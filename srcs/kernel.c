@@ -62,11 +62,11 @@ void	terminal_setcolor(uint8_t color) {
 	terminal_color = color;
 }
 
-void	putchark(char c) 
+void	putchark(char c, uint8_t color) 
 {
 	const size_t	index = terminal_row * VGA_WIDTH + terminal_column;
 
-	terminal_buffer[index] = vga_entry(c, terminal_color);
+	terminal_buffer[index] = vga_entry(c, color);
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_column = 0;
 		if (++terminal_row == VGA_HEIGHT)
@@ -74,14 +74,20 @@ void	putchark(char c)
 	}
 }
 
-void	printk(const char *str) {
+void	printk(const char *str, uint8_t color) {
 	size_t	size = strlen(str);
 
 	for (size_t i = 0; i < size; i++)
-		putchark(str[i]);
+		putchark(str[i], color);
 }
 
 void	kernel_main(void) {
 	init_kernel();
-	printk("42\n");
+	printk("        :::      ::::::::                                                       ", vga_entry_color(VGA_COLOR_LIGHT_GREY,    VGA_COLOR_BLACK));
+	printk("      :+:      :+:    :+:                                                       ", vga_entry_color(VGA_COLOR_BLUE,          VGA_COLOR_BLACK));
+	printk("    +:+ +:+         +:+                                                         ", vga_entry_color(VGA_COLOR_RED,           VGA_COLOR_BLACK));
+	printk("  +#+  +:+       +#+                                                            ", vga_entry_color(VGA_COLOR_CYAN,          VGA_COLOR_BLACK));
+	printk("+#+#+#+#+#+   +#+                                                               ", vga_entry_color(VGA_COLOR_LIGHT_MAGENTA, VGA_COLOR_BLACK));
+	printk("     #+#    #+#                                                                 ", vga_entry_color(VGA_COLOR_LIGHT_BROWN,   VGA_COLOR_BLACK));
+	printk("    ###   ########                                                              ", vga_entry_color(VGA_COLOR_LIGHT_GREEN,   VGA_COLOR_BLACK));
 }
