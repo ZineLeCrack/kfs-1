@@ -1,4 +1,6 @@
 # ===== TOOLCHAIN =====
+# export PATH="/goinfre/rlebaill/opt/cross/bin:$PATH"
+
 PREFIX = /goinfre/rlebaill/opt/cross
 TARGET = i686-elf
 
@@ -6,7 +8,7 @@ AS = $(TARGET)-as
 CC = $(TARGET)-gcc
 
 # ===== FLAGS =====
-CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Werror -fno-builtin -fno-exceptions -fno-stack-protector -nostdlib -nodefaultlibs # -fno-rtti
 LDFLAGS = -T srcs/linker.ld -ffreestanding -O2 -nostdlib
 
 # ===== SOURCES =====
