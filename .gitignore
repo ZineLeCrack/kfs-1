@@ -1,0 +1,4 @@
+*.o
+myos
+*.iso
+isodir/
