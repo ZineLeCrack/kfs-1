@@ -92,6 +92,7 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
 
 size_t strlen(const char* str) {
 	size_t len = 0;
+
 	while (str[len])
 		len++;
 	return len;
@@ -123,6 +124,35 @@ void	terminal_setcolor(uint8_t color) {
 	terminal_color = color;
 }
 
+static inline void	outb(uint16_t port, uint8_t value)
+{
+    asm volatile ("outb %0, %1" : : "a"(value), "Nd"(port));
+}
+
+void move_cursor(uint16_t x, uint16_t y)
+{
+    uint16_t pos = y * 80 + x;
+
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, (uint8_t)(pos & 0xFF));
+
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
+}
+
+void scroll() {
+	for (size_t y = 0; y < VGA_HEIGHT - 1; y++) {
+		for (size_t x = 0; x < VGA_WIDTH; x++) {
+			const size_t index = y * VGA_WIDTH + x;
+			terminal_buffer[index] = terminal_buffer[index + VGA_WIDTH];
+		}
+	}
+	for (size_t x = 0; x < VGA_WIDTH; x++) {
+		const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
+		terminal_buffer[index] = vga_entry(' ', terminal_color);
+	}
+}
+
 void	putchark(char c, uint8_t color) 
 {
 	const size_t	index = terminal_row * VGA_WIDTH + terminal_column;
@@ -130,8 +160,10 @@ void	putchark(char c, uint8_t color)
 	terminal_buffer[index] = vga_entry(c, color);
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT)
-			terminal_row = 0;
+		if (++terminal_row == VGA_HEIGHT) {
+			terminal_row = VGA_HEIGHT - 1;
+			scroll();
+		}
 	}
 }
 
@@ -166,13 +198,14 @@ void	kernel_main(void) {
 	printk("+#+#+#+#+#+   +#+                                                               ", vga_entry_color(VGA_COLOR_LIGHT_MAGENTA, VGA_COLOR_BLACK));
 	printk("     #+#    #+#                                                                 ", vga_entry_color(VGA_COLOR_LIGHT_BROWN,   VGA_COLOR_BLACK));
 	printk("    ###   ########                                                              ", vga_entry_color(VGA_COLOR_LIGHT_GREEN,   VGA_COLOR_BLACK));
+	move_cursor(terminal_column, terminal_row);
 
 	while (1) {
         uint8_t	scancode = keyboard_get_scancode();
 
 		while (!(inb(0x64) & 1));
 
-		char	*c;
+		char	*c = "";
 		switch (scancode)
 		{
 			case KEY_A:           { c = "A"; break; }
@@ -233,8 +266,17 @@ void	kernel_main(void) {
 				}
 				break;
 			}
+			case KEY_ENTER:       {
+				terminal_column = 0;
+				if (++terminal_row == VGA_HEIGHT) {
+					scroll();
+					terminal_row = VGA_HEIGHT - 1;
+				}
+				break;
+			}
 			default:              { c = "";  break; }
 		}
 		printk(c, terminal_color);
+		move_cursor(terminal_column, terminal_row);
     }
 }
