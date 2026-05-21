@@ -138,18 +138,18 @@ void	terminal_setcolor(uint8_t color) {
 
 static inline void	outb(uint16_t port, uint8_t value)
 {
-    asm volatile ("outb %0, %1" : : "a"(value), "Nd"(port));
+	asm volatile ("outb %0, %1" : : "a"(value), "Nd"(port));
 }
 
 void move_cursor(uint16_t x, uint16_t y)
 {
-    uint16_t pos = y * 80 + x;
+	uint16_t pos = y * 80 + x;
 
-    outb(0x3D4, 0x0F);
-    outb(0x3D5, (uint8_t)(pos & 0xFF));
+	outb(0x3D4, 0x0F);
+	outb(0x3D5, (uint8_t)(pos & 0xFF));
 
-    outb(0x3D4, 0x0E);
-    outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
 }
 
 void scroll() {
@@ -167,7 +167,7 @@ void scroll() {
 	}
 }
 
-void	putchark(char c, uint8_t color) 
+void	putchark(char c, uint8_t color)
 {
 	const size_t	index = terminal_row * VGA_WIDTH + terminal_column;
 
@@ -185,13 +185,13 @@ void	putchark(char c, uint8_t color)
 }
 
 static inline uint8_t	inb(uint16_t port) {
-    uint8_t ret;
+	uint8_t ret;
 
-    __asm__ volatile ("inb %1, %0"
-                      : "=a"(ret)
-                      : "Nd"(port));
+	__asm__ volatile ("inb %1, %0"
+					  : "=a"(ret)
+					  : "Nd"(port));
 
-    return ret;
+	return ret;
 }
 
 static inline uint8_t	keyboard_get_scancode() {
@@ -234,7 +234,7 @@ void	kernel_main(void) {
 	move_cursor(terminal_column, terminal_row);
 
 	while (1) {
-        uint8_t	scancode = keyboard_get_scancode();
+		uint8_t	scancode = keyboard_get_scancode();
 
 		while (!(inb(0x64) & 1));
 
@@ -335,9 +335,9 @@ void	kernel_main(void) {
 				}
 				break;
 			}
-			default:              { c = "";  break; }
+			default: { c = "";  break; }
 		}
 		printk(c, terminal_color);
 		move_cursor(terminal_column, terminal_row);
-    }
+	}
 }
