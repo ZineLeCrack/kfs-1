@@ -2,6 +2,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+typedef struct {
+	uint16_t	cursor_x;
+	uint16_t	cursor_y;
+	uint16_t	content[80][25];
+}	t_window;
+
 enum keymap {
 	KEY_ESC         = 0x01,
 	KEY_1           = 0x02,
@@ -61,6 +67,10 @@ enum keymap {
 	KEY_LALT        = 0x38,
 	KEY_SPACE       = 0x39,
 	KEY_CAPSLOCK    = 0x3A,
+	KEY_UP		    = 0x48,
+	KEY_DOWN		= 0x50,
+	KEY_LEFT		= 0x4B,
+	KEY_RIGHT		= 0x4D,
 };
 
 enum vga_color {
@@ -106,6 +116,8 @@ size_t		terminal_row;
 size_t		terminal_column;
 uint8_t		terminal_color;
 uint16_t*	terminal_buffer = (uint16_t*)VGA_MEMORY;
+size_t		current_window;
+t_window	windows[3];
 
 void	init_kernel(void) {
 	terminal_row = 0;
@@ -145,11 +157,13 @@ void scroll() {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
 			const size_t index = y * VGA_WIDTH + x;
 			terminal_buffer[index] = terminal_buffer[index + VGA_WIDTH];
+			windows[current_window].content[x][y] = windows[current_window].content[x][y + 1];
 		}
 	}
 	for (size_t x = 0; x < VGA_WIDTH; x++) {
 		const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
 		terminal_buffer[index] = vga_entry(' ', terminal_color);
+		windows[current_window].content[x][VGA_HEIGHT - 1] = vga_entry(' ', terminal_color);
 	}
 }
 
@@ -157,6 +171,7 @@ void	putchark(char c, uint8_t color)
 {
 	const size_t	index = terminal_row * VGA_WIDTH + terminal_column;
 
+	windows[current_window].content[terminal_column][terminal_row] = vga_entry(c, color);
 	terminal_buffer[index] = vga_entry(c, color);
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_column = 0;
@@ -165,6 +180,8 @@ void	putchark(char c, uint8_t color)
 			scroll();
 		}
 	}
+	windows[current_window].cursor_x = terminal_column;
+	windows[current_window].cursor_y = terminal_row;
 }
 
 static inline uint8_t	inb(uint16_t port) {
@@ -178,7 +195,12 @@ static inline uint8_t	inb(uint16_t port) {
 }
 
 static inline uint8_t	keyboard_get_scancode() {
-	return inb(0x60);
+	uint8_t code = inb(0x60);
+
+	if (code == 0xE0)
+		return (0xE000 | inb(0x60));
+
+	return code;
 }
 
 void	printk(const char *str, uint8_t color) {
@@ -190,6 +212,17 @@ void	printk(const char *str, uint8_t color) {
 
 void	kernel_main(void) {
 	init_kernel();
+
+	for (size_t i = 0; i < 3; i++) {
+		windows[i].cursor_x = 0;
+		windows[i].cursor_y = 0;
+		for (size_t y = 0; y < VGA_HEIGHT; y++) {
+			for (size_t x = 0; x < VGA_WIDTH; x++) {
+				windows[i].content[x][y] = vga_entry(' ', terminal_color);
+			}
+		}
+	}
+	current_window = 0;
 
 	printk("        :::      ::::::::                                                       ", vga_entry_color(VGA_COLOR_LIGHT_GREY,    VGA_COLOR_BLACK));
 	printk("      :+:      :+:    :+:                                                       ", vga_entry_color(VGA_COLOR_BLUE,          VGA_COLOR_BLACK));
@@ -271,6 +304,34 @@ void	kernel_main(void) {
 				if (++terminal_row == VGA_HEIGHT) {
 					scroll();
 					terminal_row = VGA_HEIGHT - 1;
+				}
+				windows[current_window].cursor_x = terminal_column;
+				windows[current_window].cursor_y = terminal_row;
+				break;
+			}
+			case KEY_LEFT:        {
+				current_window = (current_window + 2) % 3;
+				terminal_column = windows[current_window].cursor_x;
+				terminal_row = windows[current_window].cursor_y;
+				move_cursor(terminal_column, terminal_row);
+				for (size_t y = 0; y < VGA_HEIGHT; y++) {
+					for (size_t x = 0; x < VGA_WIDTH; x++) {
+						const size_t index = y * VGA_WIDTH + x;
+						terminal_buffer[index] = windows[current_window].content[x][y];
+					}
+				}
+				break;
+			}
+			case KEY_RIGHT:       {
+				current_window = (current_window + 1) % 3;
+				terminal_column = windows[current_window].cursor_x;
+				terminal_row = windows[current_window].cursor_y;
+				move_cursor(terminal_column, terminal_row);
+				for (size_t y = 0; y < VGA_HEIGHT; y++) {
+					for (size_t x = 0; x < VGA_WIDTH; x++) {
+						const size_t index = y * VGA_WIDTH + x;
+						terminal_buffer[index] = windows[current_window].content[x][y];
+					}
 				}
 				break;
 			}
