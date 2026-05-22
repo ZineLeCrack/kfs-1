@@ -20,10 +20,9 @@ OBJ = boot.o kernel.o
 # ===== OUTPUT =====
 KERNEL = myos
 ISO_DIR = isodir
-ISO = myos.iso
 
 # ===== BUILD KERNEL =====
-all: $(KERNEL) iso
+all: $(KERNEL)
 
 boot.o: $(ASM)
 	$(AS) $< -o $@
@@ -34,22 +33,15 @@ kernel.o: $(C_SRC)
 $(KERNEL): $(OBJ)
 	$(CC) -o $@ $(LDFLAGS) $(OBJ) -lgcc
 
-# ===== ISO =====
-iso: $(KERNEL)
-	mkdir -p $(ISO_DIR)/boot/grub
-	cp $(KERNEL) $(ISO_DIR)/boot/$(KERNEL)
-	cp grub.cfg $(ISO_DIR)/boot/grub/grub.cfg
-	grub-mkrescue -o $(ISO) $(ISO_DIR)
-
 # ===== RUN =====
 run:
-	qemu-system-i386 -cdrom $(ISO)
+	qemu-system-i386 -kernel $(KERNEL)
 
 # ===== CLEAN =====
 clean:
-	rm -f $(OBJ) $(KERNEL)
+	rm -f $(OBJ)
 	rm -rf $(ISO_DIR)
 
 # ===== FCLEAN =====
 fclean: clean
-	rm -f $(ISO)
+	rm -f $(KERNEL)
