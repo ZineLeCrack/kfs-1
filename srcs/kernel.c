@@ -113,6 +113,39 @@ static void				printk(const char *str, uint8_t color) {
 		putchark(str[i], color);
 }
 
+static void				handle_backspace() {
+	size_t index = terminal_row * VGA_WIDTH + terminal_column - 1;
+	terminal_buffer[index] = vga_entry(' ', terminal_color);
+	if (terminal_column) terminal_column--;
+	else if (terminal_row) {
+		terminal_column = VGA_WIDTH - 1;
+		terminal_row--;
+	}
+}
+
+static void				handle_newline() {
+	terminal_column = 0;
+	if (++terminal_row == VGA_HEIGHT) {
+		scroll();
+		terminal_row = VGA_HEIGHT - 1;
+	}
+	windows[current_window].cursor_x = terminal_column;
+	windows[current_window].cursor_y = terminal_row;
+}
+
+static void				change_window(int n) {
+	current_window = (current_window + n) % 3;
+	terminal_column = windows[current_window].cursor_x;
+	terminal_row = windows[current_window].cursor_y;
+	move_cursor(terminal_column, terminal_row);
+	for (size_t y = 0; y < VGA_HEIGHT; y++) {
+		for (size_t x = 0; x < VGA_WIDTH; x++) {
+			const size_t index = y * VGA_WIDTH + x;
+			terminal_buffer[index] = windows[current_window].content[x][y];
+		}
+	}
+}
+
 void				kernel_main(void) {
 	init_kernel();
 
@@ -192,53 +225,11 @@ void				kernel_main(void) {
 			case KEY_BACKSLASH:   { c = "\\"; break; }
 			case KEY_LSQ_BRACKET: { c = "["; break; }
 			case KEY_RSQ_BRACKET: { c = "]"; break; }
-			case KEY_BACKSPACE:   {
-				size_t index = terminal_row * VGA_WIDTH + terminal_column - 1;
-				terminal_buffer[index] = vga_entry(' ', terminal_color);
-				if (terminal_column) terminal_column--;
-				else if (terminal_row) {
-					terminal_column = VGA_WIDTH - 1;
-					terminal_row--;
-				}
-				break;
-			}
-			case KEY_ENTER:       {
-				terminal_column = 0;
-				if (++terminal_row == VGA_HEIGHT) {
-					scroll();
-					terminal_row = VGA_HEIGHT - 1;
-				}
-				windows[current_window].cursor_x = terminal_column;
-				windows[current_window].cursor_y = terminal_row;
-				break;
-			}
-			case KEY_LEFT:        {
-				current_window = (current_window + 2) % 3;
-				terminal_column = windows[current_window].cursor_x;
-				terminal_row = windows[current_window].cursor_y;
-				move_cursor(terminal_column, terminal_row);
-				for (size_t y = 0; y < VGA_HEIGHT; y++) {
-					for (size_t x = 0; x < VGA_WIDTH; x++) {
-						const size_t index = y * VGA_WIDTH + x;
-						terminal_buffer[index] = windows[current_window].content[x][y];
-					}
-				}
-				break;
-			}
-			case KEY_RIGHT:       {
-				current_window = (current_window + 1) % 3;
-				terminal_column = windows[current_window].cursor_x;
-				terminal_row = windows[current_window].cursor_y;
-				move_cursor(terminal_column, terminal_row);
-				for (size_t y = 0; y < VGA_HEIGHT; y++) {
-					for (size_t x = 0; x < VGA_WIDTH; x++) {
-						const size_t index = y * VGA_WIDTH + x;
-						terminal_buffer[index] = windows[current_window].content[x][y];
-					}
-				}
-				break;
-			}
-			default: { c = "";  break; }
+			case KEY_BACKSPACE:   { handle_backspace(); break; }
+			case KEY_ENTER:       { handle_newline(); break; }
+			case KEY_LEFT:        { change_window(2); break; }
+			case KEY_RIGHT:       { change_window(1); break; }
+			default:              { c = "";  break; }
 		}
 		printk(c, terminal_color);
 		move_cursor(terminal_column, terminal_row);
