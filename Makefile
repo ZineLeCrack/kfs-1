@@ -1,37 +1,39 @@
 # ===== TOOLCHAIN =====
-# export PATH="/goinfre/rlebaill/opt/cross/bin:$PATH"
+TARGET := i686-elf
 
-PREFIX = /goinfre/rlebaill/opt/cross
-TARGET = i686-elf
-
-AS = $(TARGET)-as
-CC = $(TARGET)-gcc
+AS := $(TARGET)-as
+CC := $(TARGET)-gcc
 
 # ===== FLAGS =====
-CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Werror -fno-builtin -fno-exceptions -fno-stack-protector -nostdlib -nodefaultlibs # -fno-rtti
-LDFLAGS = -T srcs/linker.ld -ffreestanding -O2 -nostdlib
+CFLAGS := -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Werror -fno-builtin -fno-exceptions -fno-stack-protector -nostdlib -nodefaultlibs # -fno-rtti
+LDFLAGS := -T srcs/linker.ld -ffreestanding -O2 -nostdlib
 
 # ===== SOURCES =====
-ASM = srcs/boot.s
-C_SRC = srcs/kernel.c
+ASM_SRCS := boot.s
+C_SRCS := kernel.c
 
-OBJ = boot.o kernel.o
+SRCS_DIR := srcs
+OBJS_DIR := objs
+
+OBJS := $(ASM_SRCS:%.s=$(OBJS_DIR)/%.o) $(C_SRCS:%.c=$(OBJS_DIR)/%.o)
 
 # ===== OUTPUT =====
-KERNEL = myos
-ISO_DIR = isodir
+KERNEL := myos
 
 # ===== BUILD KERNEL =====
-all: $(KERNEL)
+all: $(OBJS_DIR) $(KERNEL)
 
-boot.o: $(ASM)
+$(OBJS_DIR):
+	@mkdir -p $(OBJS_DIR)
+
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.s
 	$(AS) $< -o $@
 
-kernel.o: $(C_SRC)
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-$(KERNEL): $(OBJ)
-	$(CC) -o $@ $(LDFLAGS) $(OBJ) -lgcc
+$(KERNEL): $(OBJS)
+	$(CC) -o $@ $(LDFLAGS) $(OBJS) -lgcc
 
 # ===== RUN =====
 run:
@@ -39,9 +41,13 @@ run:
 
 # ===== CLEAN =====
 clean:
-	rm -f $(OBJ)
-	rm -rf $(ISO_DIR)
+	rm -rf $(OBJS_DIR)
 
 # ===== FCLEAN =====
 fclean: clean
 	rm -f $(KERNEL)
+
+# ===== RE =====
+re: fclean all
+
+.PHONY: run clean fclean re
