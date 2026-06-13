@@ -1,17 +1,7 @@
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#ifndef INPUT_HANDLER_H
+# define INPUT_HANDLER_H
 
-#define VGA_WIDTH	80
-#define VGA_HEIGHT	25
-#define VGA_MEMORY	0xB8000
-
-typedef struct {
-	uint16_t	cursor_x;
-	uint16_t	cursor_y;
-	uint16_t	content[VGA_WIDTH][VGA_HEIGHT];
-}	t_window;
-
+/* SCANCODE FOR KEYBOARD */
 enum keymap {
 	KEY_ESC         = 0x01,
 	KEY_1           = 0x02,
@@ -77,21 +67,7 @@ enum keymap {
 	KEY_RIGHT		= 0x4D,
 };
 
-enum vga_color {
-	VGA_COLOR_BLACK = 0,
-	VGA_COLOR_BLUE = 1,
-	VGA_COLOR_GREEN = 2,
-	VGA_COLOR_CYAN = 3,
-	VGA_COLOR_RED = 4,
-	VGA_COLOR_MAGENTA = 5,
-	VGA_COLOR_BROWN = 6,
-	VGA_COLOR_LIGHT_GREY = 7,
-	VGA_COLOR_DARK_GREY = 8,
-	VGA_COLOR_LIGHT_BLUE = 9,
-	VGA_COLOR_LIGHT_GREEN = 10,
-	VGA_COLOR_LIGHT_CYAN = 11,
-	VGA_COLOR_LIGHT_RED = 12,
-	VGA_COLOR_LIGHT_MAGENTA = 13,
-	VGA_COLOR_LIGHT_BROWN = 14,
-	VGA_COLOR_WHITE = 15,
-};
+/* INPUT HANDLE FUNCTIONS */
+void	handle_input();
+
+#endif

@@ -10,7 +10,7 @@ LDFLAGS := -T srcs/linker.ld -ffreestanding -O2 -nostdlib
 
 # ===== SOURCES =====
 ASM_SRCS := boot.s
-C_SRCS := kernel.c
+C_SRCS := utils.c printk.c input_handler.c windows_manager.c kernel.c
 
 SRCS_DIR := srcs
 OBJS_DIR := objs
@@ -30,7 +30,7 @@ $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.s
 	$(AS) $< -o $@
 
 $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c
-	$(CC) -c $< -o $@ $(CFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS) -Iincludes
 
 $(KERNEL): $(OBJS)
 	$(CC) -o $@ $(LDFLAGS) $(OBJS) -lgcc
