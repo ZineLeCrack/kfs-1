@@ -74,16 +74,16 @@ void	handle_input() {
 		case KEY_9:           { c = "9"; break; }
 		case KEY_SPACE:       { c = " "; break; }
 		case KEY_COMMA:       { c = ","; break; }
-		case KEY_POINT:       { c = "."; break; }
+		case KEY_DOT:         { c = "."; break; }
 		case KEY_SLASH:       { c = "/"; break; }
 		case KEY_SEMICOLON:   { c = ";"; break; }
 		case KEY_APOSTROPHE:  { c = "'"; break; }
-		case KEY_BACKTICK:    { c = "`"; break; }
-		case KEY_DASH:        { c = "-"; break; }
+		case KEY_GRAVE:       { c = "`"; break; }
+		case KEY_MINUS:       { c = "-"; break; }
 		case KEY_EQUAL:       { c = "="; break; }
 		case KEY_BACKSLASH:   { c = "\\"; break; }
-		case KEY_LSQ_BRACKET: { c = "["; break; }
-		case KEY_RSQ_BRACKET: { c = "]"; break; }
+		case KEY_LBRACKET:    { c = "["; break; }
+		case KEY_RBRACKET:    { c = "]"; break; }
 		case KEY_BACKSPACE:   { handle_backspace(); break; }
 		case KEY_ENTER:       { handle_newline(); break; }
 		case KEY_LEFT:        { change_window(2); break; }
