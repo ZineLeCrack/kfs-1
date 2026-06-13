@@ -94,8 +94,8 @@ void		handle_input() {
 		{
 			case KEY_UP:    { handle_direction_keys(KEY_UP); break; }
 			case KEY_DOWN:  { handle_direction_keys(KEY_DOWN); break; }
-			case KEY_LEFT:  { handle_direction_keys(KEY_LEFT); break; }
-			case KEY_RIGHT: { handle_direction_keys(KEY_RIGHT); break; }
+			case KEY_LEFT:  { (is_lshift_on || is_rshift_on) ? change_window(2) : handle_direction_keys(KEY_LEFT); break; }
+			case KEY_RIGHT: { (is_lshift_on || is_rshift_on) ? change_window(1) : handle_direction_keys(KEY_RIGHT); break; }
 			default: { break; }
 		}
 	} else {
