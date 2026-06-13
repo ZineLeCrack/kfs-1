@@ -19,17 +19,17 @@ size_t		strlen(const char* str) {
 uint8_t		inb(uint16_t port) {
 	uint8_t	ret;
 
-	__asm__ volatile ("inb %1, %0"
-					  : "=a"(ret)
-					  : "Nd"(port));
+	__asm__ volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port)); // inb dx, al
 
 	return ret;
 }
 
-uint8_t		keyboard_get_scancode() {
-	uint8_t	code = inb(0x60);
+uint16_t	keyboard_get_scancode() {
+	while (!(inb(0x64) & 1));
+	uint8_t code = inb(0x60);
 
 	if (code == 0xE0) {
+		while (!(inb(0x64) & 1));
 		return (0xE000 | inb(0x60));
 	}
 
