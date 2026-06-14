@@ -1,5 +1,6 @@
 #include "utils.h"
-#include "vga_colors.h"
+#include "defines.h"
+#include "global_variables.h"
 
 uint8_t		vga_entry_color(enum vga_color fg, enum vga_color bg) {
 	return fg | bg << 4;
@@ -22,6 +23,19 @@ uint8_t		inb(uint16_t port) {
 	__asm__ volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port)); // inb dx, al
 
 	return ret;
+}
+
+size_t		get_index() {
+	return (terminal_row * VGA_WIDTH + terminal_column);
+}
+
+size_t		get_end_index() {
+	size_t	index = get_index();
+
+	while ((terminal_buffer[index] & 0xFF) != '\0') {
+		index++;
+	}
+	return index;
 }
 
 uint16_t	keyboard_get_scancode() {

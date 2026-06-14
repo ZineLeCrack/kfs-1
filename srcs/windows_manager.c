@@ -1,6 +1,7 @@
 #include "windows_manager.h"
 #include "global_variables.h"
 #include "utils.h"
+#include "input_handler.h"
 
 void	move_cursor(uint16_t x, uint16_t y) {
 	windows[current_window].cursor_x = terminal_column;
@@ -28,9 +29,11 @@ void	scroll() {
 	for (size_t x = 0; x < VGA_WIDTH; x++) {
 		const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
 
-		terminal_buffer[index] = vga_entry(' ', terminal_color);
-		windows[current_window].content[VGA_HEIGHT - 1][x] = vga_entry(' ', terminal_color);
+		terminal_buffer[index] = vga_entry('\0', terminal_color);
+		windows[current_window].content[VGA_HEIGHT - 1][x] = vga_entry('\0', terminal_color);
 	}
+
+	windows[current_window].prompt_index -= VGA_WIDTH;
 }
 
 void	change_window(int n) {
@@ -46,6 +49,9 @@ void	change_window(int n) {
 			terminal_buffer[index] = windows[current_window].content[y][x];
 		}
 	}
+	if (get_index() == 0) {
+		new_prompt();
+	}
 }
 
 void	init_windows() {
@@ -54,7 +60,7 @@ void	init_windows() {
 		windows[i].cursor_y = 0;
 		for (size_t y = 0; y < VGA_HEIGHT; y++) {
 			for (size_t x = 0; x < VGA_WIDTH; x++) {
-				windows[i].content[y][x] = vga_entry(' ', terminal_color);
+				windows[i].content[y][x] = vga_entry('\0', terminal_color);
 			}
 		}
 	}

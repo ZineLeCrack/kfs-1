@@ -4,11 +4,12 @@
 #include "utils.h"
 #include "printk.h"
 #include "windows_manager.h"
+#include "command_manager.h"
 
 static size_t	get_last_index_by_row(size_t row) {
 	size_t	x = VGA_WIDTH - 1;
 
-	while (x > 0 && (windows[current_window].content[row][x - 1] & 0xFF) == ' ') {
+	while (x > 0 && (windows[current_window].content[row][x - 1] & 0xFF) == '\0') {
 		x--;
 	}
 
@@ -16,10 +17,16 @@ static size_t	get_last_index_by_row(size_t row) {
 }
 
 static void		handle_backspace() {
-	size_t	index = terminal_row * VGA_WIDTH + terminal_column - 1;
+	const size_t	index = get_index();
 
-	terminal_buffer[index] = vga_entry(' ', terminal_color);
-	windows->content[terminal_row][terminal_column - 1] = vga_entry(' ', terminal_color);
+	if (index == windows[current_window].prompt_index) return;
+
+	const size_t	end_index = get_end_index();
+
+	for (size_t i = index - 1; i < end_index; i++) {
+		terminal_buffer[i] = terminal_buffer[i + 1];
+		windows[current_window].content[i / VGA_WIDTH][i % VGA_WIDTH] = windows[current_window].content[(i + 1) / VGA_WIDTH][(i + 1) % VGA_WIDTH];
+	}
 
 	if (terminal_column) {
 		terminal_column--;
@@ -36,6 +43,8 @@ static void		handle_newline() {
 		scroll();
 		terminal_row = VGA_HEIGHT - 1;
 	}
+	handle_command();
+	new_prompt();
 }
 
 static void		handle_direction_keys(uint8_t code) {
@@ -51,11 +60,14 @@ static void		handle_direction_keys(uint8_t code) {
 			if (terminal_row < VGA_HEIGHT - 1) {
 				terminal_row++;
 			} else {
-				scroll();
+				terminal_column = VGA_WIDTH - 1;
 			}
 			break;
 		}
 		case KEY_LEFT: {
+			if (get_index() == windows[current_window].prompt_index) {
+				break;
+			}
 			if (terminal_column > 0) {
 				terminal_column--;
 			} else {
@@ -67,8 +79,6 @@ static void		handle_direction_keys(uint8_t code) {
 		case KEY_RIGHT: {
 			if (terminal_column < VGA_WIDTH - 1 && terminal_column < get_last_index_by_row(terminal_row)) {
 				terminal_column++;
-			} else {
-				terminal_row++;
 			}
 			break;
 		}
@@ -76,9 +86,23 @@ static void		handle_direction_keys(uint8_t code) {
 	}
 
 	size_t	x = get_last_index_by_row(terminal_row);
-	if (terminal_column > x) {
+	if (x == 0) {
+		terminal_row--;
+		terminal_column = get_last_index_by_row(terminal_row);
+	} else if (terminal_column > x) {
 		terminal_column = x;
 	}
+
+	size_t	index = get_index();
+	if (index < windows[current_window].prompt_index) {
+		terminal_row = windows[current_window].prompt_index / VGA_WIDTH;
+		terminal_column = windows[current_window].prompt_index % VGA_WIDTH;
+	}
+}
+
+void		new_prompt() {
+	printk("$> ", terminal_color);
+	windows[current_window].prompt_index = get_index();
 }
 
 void		handle_input() {

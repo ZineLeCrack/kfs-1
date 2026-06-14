@@ -125,6 +125,7 @@ enum ext_keymap {
 };
 
 /* INPUT HANDLE FUNCTIONS */
+void	new_prompt();
 void	handle_input();
 
 #endif

@@ -18,7 +18,7 @@ static void	init_kernel(void) {
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
 			const	size_t index = y * VGA_WIDTH + x;
-			terminal_buffer[index] = vga_entry(' ', terminal_color);
+			terminal_buffer[index] = vga_entry('\0', terminal_color);
 		}
 	}
 }
@@ -34,6 +34,7 @@ void		kernel_main(void) {
 	printk("+#+#+#+#+#+   +#+                                                               ", vga_entry_color(VGA_COLOR_LIGHT_MAGENTA, VGA_COLOR_BLACK));
 	printk("     #+#    #+#                                                                 ", vga_entry_color(VGA_COLOR_LIGHT_BROWN,   VGA_COLOR_BLACK));
 	printk("    ###   ########                                                              ", vga_entry_color(VGA_COLOR_LIGHT_GREEN,   VGA_COLOR_BLACK));
+	new_prompt();
 	move_cursor(terminal_column, terminal_row);
 
 	while (1) {
