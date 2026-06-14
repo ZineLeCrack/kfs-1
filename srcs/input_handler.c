@@ -16,6 +16,14 @@ static size_t	get_last_index_by_row(size_t row) {
 	return x;
 }
 
+static void		handle_tab() {
+	const size_t	spaces = 4 - ((get_index() + 1) % 4);
+
+	for (size_t i = 0; i < spaces; i++) {
+		printk(" ", terminal_color);
+	}
+}
+
 static void		handle_backspace() {
 	const size_t	index = get_index();
 
@@ -34,6 +42,18 @@ static void		handle_backspace() {
 	else if (terminal_row) {
 		terminal_row--;
 		terminal_column = get_last_index_by_row(terminal_row);
+	}
+}
+
+static void		handle_delete() {
+	const size_t	index = get_index();
+	const size_t	end_index = get_end_index();
+
+	if (index == end_index) return;
+
+	for (size_t i = index; i < end_index; i++) {
+		terminal_buffer[i] = terminal_buffer[i + 1];
+		windows[current_window].content[i] = windows[current_window].content[i + 1];
 	}
 }
 
@@ -100,6 +120,19 @@ static void		handle_direction_keys(uint8_t code) {
 	}
 }
 
+void	handle_ctrl_c() {
+	const size_t	end_index = get_end_index();
+
+	terminal_column = 0;
+	terminal_row = end_index / VGA_WIDTH;
+
+	if (++terminal_row == VGA_HEIGHT) {
+		terminal_row--;
+		scroll();
+	}
+	new_prompt();
+}
+
 void		new_prompt() {
 	printk("$> ", terminal_color);
 	windows[current_window].prompt_index = get_index();
@@ -109,6 +142,8 @@ void		handle_input() {
 	static bool	is_lshift_on = false;
 	static bool	is_rshift_on = false;
 	static bool is_caps_lock_on = false;
+	static bool	is_lctrl_on = false;
+	static bool	is_rctrl_on = false;
 
 	uint16_t	scancode = keyboard_get_scancode();
 
@@ -116,18 +151,22 @@ void		handle_input() {
 	if ((scancode & 0xFF00) == 0xE000) {
 		switch (scancode & 0xFF)
 		{
-			case KEY_UP:    { handle_direction_keys(KEY_UP); break; }
-			case KEY_DOWN:  { handle_direction_keys(KEY_DOWN); break; }
-			case KEY_LEFT:  { (is_lshift_on || is_rshift_on) ? change_window(2) : handle_direction_keys(KEY_LEFT); break; }
-			case KEY_RIGHT: { (is_lshift_on || is_rshift_on) ? change_window(1) : handle_direction_keys(KEY_RIGHT); break; }
-			default: { break; }
+			case KEY_UP:    		{ handle_direction_keys(KEY_UP); break; }
+			case KEY_DOWN:  		{ handle_direction_keys(KEY_DOWN); break; }
+			case KEY_LEFT:  		{ (is_lshift_on || is_rshift_on) ? change_window(2) : handle_direction_keys(KEY_LEFT); break; }
+			case KEY_RIGHT: 		{ (is_lshift_on || is_rshift_on) ? change_window(1) : handle_direction_keys(KEY_RIGHT); break; }
+			case KEY_DELETE:		{ handle_delete(); break; }
+			case KEY_END:			{ terminal_column = get_last_index_by_row(terminal_row); break; }
+			case KEY_RCTRL:			{ is_rctrl_on = true; break; }
+			case KEY_RCTRL | 0x80:	{ is_rctrl_on = false; break; }
+			default:				{ break; }
 		}
 	} else {
 		switch (scancode)
 		{
 			case KEY_A:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "A") : (c = "a")); break; }
 			case KEY_B:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "B") : (c = "b")); break; }
-			case KEY_C:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "C") : (c = "c")); break; }
+			case KEY_C:             { (is_lctrl_on || is_rctrl_on) ? (handle_ctrl_c()) : (((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "C") : (c = "c"))); break; }
 			case KEY_D:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "D") : (c = "d")); break; }
 			case KEY_E:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "E") : (c = "e")); break; }
 			case KEY_F:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "F") : (c = "f")); break; }
@@ -162,6 +201,7 @@ void		handle_input() {
 			case KEY_8:             { ((is_lshift_on || is_rshift_on) ? (c = "*") : (c = "8")); break; }
 			case KEY_9:             { ((is_lshift_on || is_rshift_on) ? (c = "(") : (c = "9")); break; }
 			case KEY_SPACE:         { c = " "; break; }
+			case KEY_TAB:			{ handle_tab(); break; }
 			case KEY_COMMA:         { ((is_lshift_on || is_rshift_on) ? (c = "<") : (c = ",")); break; }
 			case KEY_DOT:           { ((is_lshift_on || is_rshift_on) ? (c = ">") : (c = ".")); break; }
 			case KEY_SLASH:         { ((is_lshift_on || is_rshift_on) ? (c = "?") : (c = "/")); break; }
@@ -180,6 +220,8 @@ void		handle_input() {
 			case KEY_LSHIFT | 0x80: { is_lshift_on = false; break; }
 			case KEY_RSHIFT | 0x80: { is_rshift_on = false; break; }
 			case KEY_CAPSLOCK:      { is_caps_lock_on = !is_caps_lock_on; break; }
+			case KEY_LCTRL:			{ is_lctrl_on = true; break; }
+			case KEY_LCTRL | 0x80:	{ is_lctrl_on = false; break; }
 			default:                { break; }
 		}
 	}
