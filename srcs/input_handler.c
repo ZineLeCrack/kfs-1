@@ -9,7 +9,7 @@
 static size_t	get_last_index_by_row(size_t row) {
 	size_t	x = VGA_WIDTH - 1;
 
-	while (x > 0 && (windows[current_window].content[row][x - 1] & 0xFF) == '\0') {
+	while (x > 0 && (windows[current_window].content[(row * VGA_WIDTH) + (x - 1)] & 0xFF) == '\0') {
 		x--;
 	}
 
@@ -25,7 +25,7 @@ static void		handle_backspace() {
 
 	for (size_t i = index - 1; i < end_index; i++) {
 		terminal_buffer[i] = terminal_buffer[i + 1];
-		windows[current_window].content[i / VGA_WIDTH][i % VGA_WIDTH] = windows[current_window].content[(i + 1) / VGA_WIDTH][(i + 1) % VGA_WIDTH];
+		windows[current_window].content[i] = windows[current_window].content[i + 1];
 	}
 
 	if (terminal_column) {
