@@ -17,6 +17,13 @@ size_t		strlen(const char* str) {
 	return len;
 }
 
+int			strcmp(const char *s1, const char *s2) {
+	size_t	i;
+
+	for (i = 0; s1[i] && s2[i] && s1[i] == s2[i]; i++);
+	return s1[i] - s2[i];
+}
+
 uint8_t		inb(uint16_t port) {
 	uint8_t	ret;
 
@@ -52,4 +59,8 @@ uint16_t	keyboard_get_scancode() {
 
 void		outb(uint16_t port, uint8_t value) {
 	asm volatile ("outb %0, %1" : : "a"(value), "Nd"(port));
+}
+
+void		outw(uint16_t port, uint16_t value) {
+    __asm__ volatile ("outw %0, %1" : : "a"(value), "Nd"(port));
 }

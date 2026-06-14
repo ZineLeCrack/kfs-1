@@ -5,7 +5,19 @@
 #include "printk.h"
 
 static void	which_command(const char *cmd) {
-	printk(cmd, terminal_color);
+	if (!strcmp(cmd, "poweroff")) {
+		outw(0x604, 0x2000);
+	} else if (!strcmp(cmd, "restart")) {
+		outb(0x64, 0xFE);
+	} else if (!strcmp(cmd, "chcolor")) {
+		terminal_color = (((terminal_color & 0xF) + 1) % 16) | (((terminal_color >> 4) & 0xF) << 4);
+	} else if (!strcmp(cmd, "chbcolor")) {
+		terminal_color = (terminal_color & 0xF) | (((((terminal_color >> 4) & 0xF) + 1) % 16) << 4);
+	} else {
+		printk("command not found: \"", terminal_color);
+		printk(cmd, terminal_color);
+		printk("\"", terminal_color);
+	}
 }
 
 static void	tmp(const size_t N, const char *buf) {
