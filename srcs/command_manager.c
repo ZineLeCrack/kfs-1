@@ -31,7 +31,7 @@ static void	tmp(const size_t N, const char *buf) {
 	which_command(cmd);
 }
 
-void	handle_command() {
+void	handle_command(void) {
 	void	*data = &(terminal_buffer[windows[current_window].prompt_index]);
 	char	*buf = (char *)data;
 

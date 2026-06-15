@@ -32,11 +32,11 @@ uint8_t		inb(uint16_t port) {
 	return ret;
 }
 
-size_t		get_index() {
+size_t		get_index(void) {
 	return (terminal_row * VGA_WIDTH + terminal_column);
 }
 
-size_t		get_end_index() {
+size_t		get_end_index(void) {
 	size_t	index = get_index();
 
 	while ((terminal_buffer[index] & 0xFF) != '\0') {
@@ -45,7 +45,18 @@ size_t		get_end_index() {
 	return index;
 }
 
-uint16_t	keyboard_get_scancode() {
+void		clear_cmd(void) {
+	size_t			index = windows[current_window].prompt_index;
+	const size_t	end_index = get_end_index();
+
+	while (index < end_index) {
+		terminal_buffer[index] = '\0';
+		windows[current_window].content[index] = '\0';
+		index++;
+	}
+}
+
+uint16_t	keyboard_get_scancode(void) {
 	while (!(inb(0x64) & 1));
 	uint8_t code = inb(0x60);
 

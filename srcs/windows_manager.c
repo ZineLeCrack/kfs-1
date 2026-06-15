@@ -16,7 +16,7 @@ void	move_cursor(uint16_t x, uint16_t y) {
 	outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
 }
 
-void	scroll() {
+void	scroll(void) {
 	for (size_t y = 0; y < VGA_HEIGHT - 1; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
 			const size_t index = y * VGA_WIDTH + x;
@@ -54,7 +54,7 @@ void	change_window(int n) {
 	}
 }
 
-void	init_windows() {
+void	init_windows(void) {
 	for (size_t i = 0; i < 3; i++) {
 		windows[i].cursor_x = 0;
 		windows[i].cursor_y = 0;

@@ -16,7 +16,7 @@ static size_t	get_last_index_by_row(size_t row) {
 	return x;
 }
 
-static void		handle_tab() {
+static void		handle_tab(void) {
 	const size_t	spaces = 4 - ((get_index() + 1) % 4);
 
 	for (size_t i = 0; i < spaces; i++) {
@@ -24,7 +24,7 @@ static void		handle_tab() {
 	}
 }
 
-static void		handle_backspace() {
+static void		handle_backspace(void) {
 	const size_t	index = get_index();
 
 	if (index == windows[current_window].prompt_index) return;
@@ -45,7 +45,7 @@ static void		handle_backspace() {
 	}
 }
 
-static void		handle_delete() {
+static void		handle_delete(void) {
 	const size_t	index = get_index();
 	const size_t	end_index = get_end_index();
 
@@ -57,7 +57,7 @@ static void		handle_delete() {
 	}
 }
 
-static void		handle_newline() {
+static void		handle_newline(void) {
 	terminal_column = 0;
 	if (++terminal_row == VGA_HEIGHT) {
 		scroll();
@@ -120,7 +120,7 @@ static void		handle_direction_keys(uint8_t code) {
 	}
 }
 
-void	handle_ctrl_c() {
+void	handle_ctrl_c(void) {
 	const size_t	end_index = get_end_index();
 
 	terminal_column = 0;
@@ -133,12 +133,12 @@ void	handle_ctrl_c() {
 	new_prompt();
 }
 
-void		new_prompt() {
+void		new_prompt(void) {
 	printk("$> ", terminal_color);
 	windows[current_window].prompt_index = get_index();
 }
 
-void		handle_input() {
+void		handle_input(void) {
 	static bool	is_lshift_on = false;
 	static bool	is_rshift_on = false;
 	static bool is_caps_lock_on = false;
@@ -225,7 +225,6 @@ void		handle_input() {
 			default:                { break; }
 		}
 	}
-	(void)is_lshift_on; (void)is_rshift_on;
 	if (c[0]) printk(c, terminal_color);
 	move_cursor(terminal_column, terminal_row);
 }

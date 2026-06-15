@@ -2,6 +2,6 @@
 # define COMMAND_MANAGER_H
 
 /* COMMAND MANAGEMENT FUNCTIONS */
-void	handle_command();
+void	handle_command(void);
 
 #endif

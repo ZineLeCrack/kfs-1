@@ -5,8 +5,8 @@
 
 /* WINDOWS MANAGERMENT */
 void	move_cursor(uint16_t x, uint16_t y);
-void	scroll();
+void	scroll(void);
 void	change_window(int n);
-void	init_windows();
+void	init_windows(void);
 
 #endif
