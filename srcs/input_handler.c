@@ -167,7 +167,7 @@ void		handle_input() {
 			case KEY_A:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "A") : (c = "a")); break; }
 			case KEY_B:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "B") : (c = "b")); break; }
 			case KEY_C:             { (is_lctrl_on || is_rctrl_on) ? (handle_ctrl_c()) : (((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "C") : (c = "c"))); break; }
-			case KEY_D:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "D") : (c = "d")); break; }
+			case KEY_D:             { (is_lctrl_on || is_rctrl_on) ? (outw(0x604, 0x2000)) : ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "D") : (c = "d")); break; }
 			case KEY_E:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "E") : (c = "e")); break; }
 			case KEY_F:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "F") : (c = "f")); break; }
 			case KEY_G:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "G") : (c = "g")); break; }
