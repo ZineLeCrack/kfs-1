@@ -29,6 +29,10 @@ static void	tmp(const size_t N, const char *buf) {
 	cmd[N] = '\0';
 
 	which_command(cmd);
+	for (size_t i = HISTORY_SIZE - 1; i > 0; i--) {
+		strncpy(windows[current_window].history[i], windows[current_window].history[i - 1], CMD_MAX_SIZE);
+	}
+	strncpy(windows[current_window].history[0], cmd, CMD_MAX_SIZE);
 }
 
 void	handle_command(void) {

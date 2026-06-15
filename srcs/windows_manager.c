@@ -58,6 +58,10 @@ void	init_windows(void) {
 	for (size_t i = 0; i < 3; i++) {
 		windows[i].cursor_x = 0;
 		windows[i].cursor_y = 0;
+		windows[i].history_index = -1;
+		for (size_t j = 0; j < HISTORY_SIZE; j++) {
+			windows[i].history[j][0] = '\0';
+		}
 		for (size_t y = 0; y < VGA_HEIGHT; y++) {
 			for (size_t x = 0; x < VGA_WIDTH; x++) {
 				windows[i].content[y * VGA_WIDTH + x] = vga_entry('\0', terminal_color);

@@ -10,7 +10,7 @@ uint8_t		vga_entry_color(enum vga_color fg, enum vga_color bg);
 uint16_t	vga_entry(unsigned char uc, uint8_t color);
 size_t		strlen(const char* str);
 int			strcmp(const char *s1, const char *s2);
-char		*strncpy(const char *src, char *dest, size_t size);
+char		*strncpy(char *dest, const char *src, size_t size);
 uint8_t		inb(uint16_t port);
 size_t		get_index(void);
 size_t		get_end_index(void);

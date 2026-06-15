@@ -65,23 +65,41 @@ static void		handle_newline(void) {
 	}
 	handle_command();
 	new_prompt();
+	windows[current_window].history_index = -1;
 }
 
 static void		handle_direction_keys(uint8_t code) {
 	switch (code)
 	{
 		case KEY_UP: {
-			if (terminal_row > 0) {
-				terminal_row--;
+			int	history_index = windows[current_window].history_index;
+			if (history_index + 1 < HISTORY_SIZE) {
+				if (windows[current_window].history[history_index + 1][0]) {
+					windows[current_window].history_index++;
+					clear_cmd();
+					printk(windows[current_window].history[history_index + 1], terminal_color);
+				}
 			}
+			// if (terminal_row > 0) {
+			// 	terminal_row--;
+			// }
 			break;
 		}
 		case KEY_DOWN: {
-			if (terminal_row < VGA_HEIGHT - 1) {
-				terminal_row++;
-			} else {
-				terminal_column = VGA_WIDTH - 1;
+			int	history_index = windows[current_window].history_index;
+			if (history_index > 0) {
+				windows[current_window].history_index--;
+				clear_cmd();
+				printk(windows[current_window].history[history_index - 1], terminal_color);
+			} else if (history_index == 0) {
+				windows[current_window].history_index--;
+				clear_cmd();
 			}
+			// if (terminal_row < VGA_HEIGHT - 1) {
+			// 	terminal_row++;
+			// } else {
+			// 	terminal_column = VGA_WIDTH - 1;
+			// }
 			break;
 		}
 		case KEY_LEFT: {
