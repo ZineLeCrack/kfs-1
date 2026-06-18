@@ -115,8 +115,13 @@ static void		handle_direction_keys(uint8_t code) {
 			break;
 		}
 		case KEY_RIGHT: {
-			if (terminal_column < VGA_WIDTH - 1 && terminal_column < get_last_index_by_row(terminal_row)) {
-				terminal_column++;
+			if (terminal_column < get_end_index()) {
+				if (terminal_column < VGA_WIDTH - 1) {
+					terminal_column++;
+				} else if (terminal_row + 1 < VGA_HEIGHT) {
+					terminal_column = 0;
+					terminal_row++;
+				}
 			}
 			break;
 		}
