@@ -41,7 +41,12 @@ void	handle_command(void) {
 
 	if (!*buf) return;
 
-	parse_buffer(strlen(buf) / 2, buf);
+	size_t	len = 0;
+	while (buf[len * 2]) {
+		len++;
+	}
+
+	parse_buffer(len, buf);
 
 	terminal_column = 0;
 	if (++terminal_row == VGA_HEIGHT) {
