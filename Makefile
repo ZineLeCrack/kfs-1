@@ -5,7 +5,7 @@ AS := $(TARGET)-as
 CC := $(TARGET)-gcc
 
 # ===== FLAGS =====
-CFLAGS := -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Werror -fno-builtin -fno-exceptions -fno-stack-protector -nostdlib -nodefaultlibs # -fno-rtti
+CFLAGS := -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Werror -fno-builtin -fno-exceptions -fno-stack-protector -nostdlib -nodefaultlibs
 LDFLAGS := -T srcs/linker.ld -ffreestanding -O2 -nostdlib
 
 # ===== SOURCES =====
