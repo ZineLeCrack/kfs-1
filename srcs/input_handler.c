@@ -138,7 +138,14 @@ static void		handle_direction_keys(uint8_t code) {
 	}
 }
 
-void	handle_ctrl_c(void) {
+static void	handle_ctrl_a(void) {
+	size_t	index = windows[current_window].prompt_index;
+ 
+	terminal_row = index / VGA_WIDTH;
+	terminal_column = index % VGA_WIDTH;
+}
+
+static void	handle_ctrl_c(void) {
 	const size_t	end_index = get_end_index();
 
 	terminal_column = 0;
@@ -182,7 +189,7 @@ void		handle_input(void) {
 	} else {
 		switch (scancode)
 		{
-			case KEY_A:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "A") : (c = "a")); break; }
+			case KEY_A:             { (is_lctrl_on || is_rctrl_on) ? (handle_ctrl_a()) : ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "A") : (c = "a")); break; }
 			case KEY_B:             { ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "B") : (c = "b")); break; }
 			case KEY_C:             { (is_lctrl_on || is_rctrl_on) ? (handle_ctrl_c()) : (((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "C") : (c = "c"))); break; }
 			case KEY_D:             { (is_lctrl_on || is_rctrl_on) ? (outw(0x604, 0x2000)) : ((is_caps_lock_on ^ (is_lshift_on || is_rshift_on)) ? (c = "D") : (c = "d")); break; }
