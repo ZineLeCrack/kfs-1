@@ -20,7 +20,7 @@ static void	which_command(const char *cmd) {
 	}
 }
 
-static void	tmp(const size_t N, const char *buf) {
+static void	parse_buffer(const size_t N, const char *buf) {
 	char	cmd[N + 1];
 
 	for (size_t i = 0; i < N; i++) {
@@ -41,7 +41,7 @@ void	handle_command(void) {
 
 	if (!*buf) return;
 
-	tmp(strlen(buf) / 2, buf);
+	parse_buffer(strlen(buf) / 2, buf);
 
 	terminal_column = 0;
 	if (++terminal_row == VGA_HEIGHT) {
