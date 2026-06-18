@@ -7,4 +7,7 @@
 # define HISTORY_SIZE	16
 # define CMD_MAX_SIZE	255
 
+# define NO_NEWLINE		0
+# define NEWLINE		1
+
 #endif
