@@ -59,6 +59,7 @@ static void		handle_delete(void) {
 
 static void		handle_newline(void) {
 	terminal_column = 0;
+	terminal_row = get_end_index() / VGA_WIDTH;
 	if (++terminal_row == VGA_HEIGHT) {
 		scroll();
 		terminal_row = VGA_HEIGHT - 1;
